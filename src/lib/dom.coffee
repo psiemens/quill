@@ -341,7 +341,7 @@ dom = _.extend(dom,
   TEXT_NODE: 3
   ZERO_WIDTH_NOBREAK_SPACE:  "\uFEFF"
 
-  DEFAULT_BLOCK_TAG: 'DIV'
+  DEFAULT_BLOCK_TAG: 'P'
   DEFAULT_BREAK_TAG: 'BR'
   DEFAULT_INLINE_TAG: 'SPAN'
   EMBED_TEXT: '!' # No reason we picked ! besides it being one character (so delta cannot split it up)
@@ -405,7 +405,7 @@ dom = _.extend(dom,
   }
 
   LINE_TAGS: {
-    'DIV'
+    'P'
     'LI'
   }
 
