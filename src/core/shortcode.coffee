@@ -2,79 +2,27 @@ _   = require('lodash')
 dom = require('../lib/dom')
 
 
-class Format
-  @types:
-    LINE: 'line'
+class Shortcode
 
-  @FORMATS:
-    bold:
-      tag: 'B'
-      prepare: 'bold'
-
-    italic:
-      tag: 'I'
-      prepare: 'italic'
-
-    underline:
-      tag: 'U'
-      prepare: 'underline'
-
-    strike:
-      tag: 'S'
-      prepare: 'strikeThrough'
-
-    color:
-      style: 'color'
-      default: 'rgb(0, 0, 0)'
-      prepare: 'foreColor'
-
-    background:
-      style: 'backgroundColor'
-      default: 'rgb(255, 255, 255)'
-      prepare: 'backColor'
-
-    font:
-      style: 'fontFamily'
-      default: "'Helvetica', 'Arial', sans-serif"
-      prepare: 'fontName'
-
-    size:
-      style: 'fontSize'
-      default: '13px'
-      prepare: (value) ->
-        document.execCommand('fontSize', false, dom.convertFontSize(value))
-
-    link:
-      tag: 'A'
-      attribute: 'href'
-
-    image:
-      tag: 'IMG'
-      targets: ['src', 'data-id', 'class']
-
-    align:
-      type: Format.types.LINE
-      style: 'textAlign'
-      default: 'left'
-
-    bullet:
-      type: Format.types.LINE
-      exclude: 'list'
-      parentTag: 'UL'
-      tag: 'LI'
-
-    list:
-      type: Format.types.LINE
-      exclude: 'bullet'
-      parentTag: 'OL'
-      tag: 'LI'
-
+  @SHORTCODES:
+    attachment:
+      model: 'attachment'
+      display:
+        tag: 'IMG'
+        attribute: 'src'
+      save:
+        shortcode: 'image'
+        identifier: 'id'
 
   constructor: (, @config) ->
 
   add: (node, value) ->
     return this.remove(node) unless value
-    return node if this.value(node) == value      
+    return node if this.value(node) == value
+    ####
+    if _.isString(@config.model)
+      return this.addSpecial(node, value)
+    ####
     if _.isString(@config.parentTag)
       parentNode = document.createElement(@config.parentTag)
       dom(node).wrap(parentNode)
@@ -92,10 +40,6 @@ class Format
       else
         dom(node).wrap(formatNode)
         node = formatNode
-    if _.isObject(@config.targets)
-      _.each(@config.targets, (attr) ->
-          node.setAttribute(attr, value[attr])
-        )
     if _.isString(@config.style) or _.isString(@config.attribute) or _.isString(@config.class)
       if _.isString(@config.class)
         node = this.remove(node)
@@ -109,6 +53,16 @@ class Format
         node.setAttribute(@config.attribute, value)
       if _.isString(@config.class)
         dom(node).addClass(@config.class + value)
+    return node
+
+  addSpecial: (node, value) ->
+    if _.isString(@config.display)
+      formatNode = document.createElement(@config.display.tag)
+      dom(node).wrap(formatNode)
+      node = formatNode
+    if _.isString(@config.display.attribute)
+      node.setAttribute(@config.attribute, value)
+
     return node
 
   isType: (type) ->

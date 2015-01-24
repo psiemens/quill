@@ -37,6 +37,7 @@ Normalizer =
     'OL'
     'UL'
     'LI'
+    'P'
   }
 
   # Make sure descendant break tags are not causing multiple lines to be rendered
