@@ -47,7 +47,11 @@ class Keyboard
   _initDeletes: ->
     this.addHotkey([dom.KEYS.DELETE, dom.KEYS.BACKSPACE], (range, hotkey) =>
       if @quill.editor.selection.selectedEmbed
-        console.log('this is where we would delted the embed')
+        if @quill.editor.selection.checkFocus()
+          @quill.editor.doc.removeLine(@quill.editor.selection.selectedEmbed)
+          return false
+        else
+          return true
       else if range? and @quill.getLength() > 1
         if range.start != range.end
           @quill.deleteText(range.start, range.end, Quill.sources.USER)
@@ -60,8 +64,11 @@ class Keyboard
   _initEnter: ->
     this.addHotkey(dom.KEYS.ENTER, (range, hotkey) =>
       if @quill.editor.selection.selectedEmbed
-        console.log('this is where we would add a line break')
-        return false
+        if @quill.editor.selection.checkFocus()
+          console.log('this is where we would add a line break')
+          return false
+        else
+          return true
     )
 
   _initHotkeys: ->
