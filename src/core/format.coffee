@@ -49,6 +49,10 @@ class Format
       tag: 'A'
       attribute: 'href'
 
+    image:
+      tag: 'IMG'
+      attribute: 'src'
+
     align:
       type: Format.types.LINE
       style: 'textAlign'
