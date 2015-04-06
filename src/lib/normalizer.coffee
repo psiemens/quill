@@ -50,6 +50,9 @@ Normalizer =
     return lineNode
 
   normalizeLine: (lineNode) ->
+    # Don't normalize embedded content
+    if dom(lineNode).hasClass('ql-embed')
+      return lineNode
     lineNode = Normalizer.wrapInline(lineNode)
     lineNode = Normalizer.handleBreaks(lineNode)
     lineNode = Normalizer.pullBlocks(lineNode)

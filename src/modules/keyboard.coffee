@@ -17,6 +17,7 @@ class Keyboard
     this._initListeners()
     this._initHotkeys()
     this._initDeletes()
+    this._initEnter()
 
   addHotkey: (hotkeys, callback) ->
     hotkeys = [hotkeys] unless Array.isArray(hotkeys)
@@ -45,13 +46,22 @@ class Keyboard
 
   _initDeletes: ->
     this.addHotkey([dom.KEYS.DELETE, dom.KEYS.BACKSPACE], (range, hotkey) =>
-      if range? and @quill.getLength() > 1
+      if @quill.editor.selection.selectedEmbed
+        console.log('this is where we would delted the embed')
+      else if range? and @quill.getLength() > 1
         if range.start != range.end
           @quill.deleteText(range.start, range.end, Quill.sources.USER)
         else
           start = if (hotkey.key == dom.KEYS.BACKSPACE) then range.start - 1 else range.start
           @quill.deleteText(start, start + 1, Quill.sources.USER) if start >= 0
       return false
+    )
+
+  _initEnter: ->
+    this.addHotkey(dom.KEYS.ENTER, (range, hotkey) =>
+      if @quill.editor.selection.selectedEmbed
+        console.log('this is where we would add a line break')
+        return false
     )
 
   _initHotkeys: ->

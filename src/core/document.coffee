@@ -3,12 +3,13 @@ Delta      = require('rich-text/lib/delta')
 dom        = require('../lib/dom')
 Format     = require('./format')
 Line       = require('./line')
+Embed      = require('./embed')
 LinkedList = require('../lib/linked-list')
 Normalizer = require('../lib/normalizer')
 
 
 class Document
-  constructor: (@root, options = {}) ->
+  constructor: (@root, @editor, options = {}) ->
     @formats = {}
     _.each(options.formats, _.bind(this.addFormat, this))
     this.setHTML(@root.innerHTML)
@@ -20,6 +21,9 @@ class Document
 
   appendLine: (lineNode) ->
     return this.insertLineBefore(lineNode, null)
+
+  appendEmbed: (embedNode) ->
+    return this.insertEmbedBefore(embedNode, null)
 
   findLeafAt: (index, inclusive) ->
     [line, offset] = this.findLineAt(index)
@@ -66,6 +70,17 @@ class Document
     @lineMap[line.id] = line
     return line
 
+  insertEmbedBefore: (newEmbedNode, refLine) ->
+    embed = new Embed(this, newEmbedNode)
+    if refLine?
+      @root.insertBefore(newEmbedNode, refLine.node) unless dom(newEmbedNode.parentNode).isElement()  # Would prefer newLineNode.parentNode? but IE will have non-null object
+      @lines.insertAfter(refLine.prev, embed)
+    else
+      @root.appendChild(newEmbedNode) unless dom(newEmbedNode.parentNode).isElement()
+      @lines.append(embed)
+    @lineMap[embed.id] = embed
+    return embed
+
   mergeLines: (line, lineToMerge) ->
     if lineToMerge.length > 1
       dom(line.leaves.last.node).remove() if line.length == 1
@@ -104,8 +119,11 @@ class Document
     )
     # New lines appended
     while lineNode?
-      lineNode = Normalizer.normalizeLine(lineNode)
-      this.appendLine(lineNode)
+      if dom(lineNode).hasClass(Embed.CLASS_NAME)
+        this.appendEmbed(lineNode)
+      else
+        lineNode = Normalizer.normalizeLine(lineNode)
+        this.appendLine(lineNode)
       lineNode = dom(lineNode).nextLineNode(@root)
 
   removeLine: (line) ->

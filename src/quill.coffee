@@ -160,8 +160,10 @@ class Quill extends EventEmitter2
       return if _.isString(op.insert) then op.insert else ''
     ).join('')
 
-  insertEmbed: (index, type, url, source) ->
-    this.insertText(index, dom.EMBED_TEXT, type, url, source)
+  insertEmbed: (index, source) ->
+    delta = new Delta().retain(index).insert(dom.EMBED_TEXT, { 'embed': true })
+    inserts = @editor.applyDelta(delta, source)
+    return inserts[0].node
 
   insertText: (index, text, name, value, source) ->
     [index, end, formats, source] = this._buildParams(index, 0, name, value, source)

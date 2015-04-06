@@ -2,6 +2,7 @@ _         = require('lodash')
 dom       = require('../lib/dom')
 Document  = require('./document')
 Line      = require('./line')
+Embed     = require('./embed')
 Selection = require('./selection')
 
 
@@ -13,7 +14,7 @@ class Editor
 
   constructor: (@root, @quill, @options = {}) ->
     @root.setAttribute('id', @options.id)
-    @doc = new Document(@root, @options)
+    @doc = new Document(@root, this, @options)
     @delta = @doc.toDelta()
     @selection = new Selection(@doc, @quill)
     @timer = setInterval(_.bind(this.checkUpdate, this), @options.pollInterval)
@@ -29,6 +30,7 @@ class Editor
     @root.setAttribute('contenteditable', enabled)
 
   applyDelta: (delta, source) ->
+    inserted = []
     localDelta = this._update()
     if localDelta
       delta = localDelta.transform(delta, true)
@@ -38,7 +40,7 @@ class Editor
         index = 0
         _.each(delta.ops, (op) =>
           if _.isString(op.insert)
-            this._insertAt(index, op.insert, op.attributes)
+            inserted.push(this._insertAt(index, op.insert, op.attributes))
             index += op.insert.length;
           else if _.isNumber(op.insert)
             # TODO embed needs native insert
@@ -59,6 +61,8 @@ class Editor
       @quill.emit(@quill.constructor.events.TEXT_CHANGE, delta, source) if delta and source != Editor.sources.SILENT
     if localDelta and localDelta.ops.length > 0 and source != Editor.sources.SILENT
       @quill.emit(@quill.constructor.events.TEXT_CHANGE, localDelta, Editor.sources.USER)
+    if inserted.length > 0
+      return inserted
 
   checkUpdate: (source = 'user') ->
     return clearInterval(@timer) unless @root.parentNode?
@@ -104,6 +108,14 @@ class Editor
 
   _deleteAt: (index, length) ->
     return if length <= 0
+
+    [firstLine, offset] = @doc.findLineAt(index)
+    if firstLine.node.className == Embed.CLASS_NAME
+      if firstLine.next.length <= 1
+            @doc.removeLine(firstLine.next)
+      @selection.selectEmbed(firstLine)
+      return
+
     @selection.shiftAfter(index, -1 * length, =>
       [firstLine, offset] = @doc.findLineAt(index)
       curLine = firstLine
@@ -111,7 +123,7 @@ class Editor
       while curLine? and length > 0
         nextLine = curLine.next
         deleteLength = Math.min(curLine.length - offset, length)
-        if offset == 0 and length >= curLine.length
+        if (offset == 0 and length >= curLine.length)
           @doc.removeLine(curLine)
         else
           curLine.deleteText(offset, deleteLength)
@@ -135,6 +147,7 @@ class Editor
     )
 
   _insertAt: (index, text, formatting = {}) ->
+    embedLine = false
     @selection.shiftAfter(index, text.length, =>
       text = text.replace(/\r\n?/g, '\n')
       lineTexts = text.split('\n')
@@ -148,16 +161,23 @@ class Editor
             line.format(formatting)
             nextLine = null
         else
-          line.insertText(offset, lineText, formatting)
-          if i < lineTexts.length - 1       # Are there more lines to insert?
-            nextLine = @doc.splitLine(line, offset + lineText.length)
-            _.each(_.defaults({}, formatting, line.formats), (value, format) ->
-              line.format(format, formatting[format])
-            )
-            offset = 0
+          if(formatting.embed)
+            oldLine = line
+            line = @doc.insertEmbedBefore(document.createElement('DIV'), oldLine)
+            @doc.removeLine(oldLine)
+            embedLine = line
+          else
+            line.insertText(offset, lineText, formatting)
+            if i < lineTexts.length - 1       # Are there more lines to insert?
+              nextLine = @doc.splitLine(line, offset + lineText.length)
+              _.each(_.defaults({}, formatting, line.formats), (value, format) ->
+                line.format(format, formatting[format])
+              )
+              offset = 0
         line = nextLine
       )
     )
+    return embedLine
 
   _trackDelta: (fn) ->
     fn()

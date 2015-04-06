@@ -15,6 +15,7 @@ class Line extends LinkedList.Node
   constructor: (@doc, @node) ->
     @id = _.uniqueId(Line.ID_PREFIX)
     @formats = {}
+    dom(@node).removeClass('ql-embed')
     dom(@node).addClass(Line.CLASS_NAME)
     this.rebuild()
     super(@node)

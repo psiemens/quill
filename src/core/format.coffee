@@ -5,6 +5,7 @@ dom = require('../lib/dom')
 class Format
   @types:
     LINE: 'line'
+    BLOCK: 'block'
 
   @FORMATS:
     bold:
@@ -48,10 +49,6 @@ class Format
       tag: 'A'
       attribute: 'href'
 
-    image:
-      tag: 'IMG'
-      targets: ['src', 'data-id', 'class']
-
     align:
       type: Format.types.LINE
       style: 'textAlign'
@@ -74,7 +71,7 @@ class Format
 
   add: (node, value) ->
     return this.remove(node) unless value
-    return node if this.value(node) == value      
+    return node if this.value(node) == value
     if _.isString(@config.parentTag)
       parentNode = document.createElement(@config.parentTag)
       dom(node).wrap(parentNode)
@@ -92,11 +89,7 @@ class Format
       else
         dom(node).wrap(formatNode)
         node = formatNode
-    if _.isObject(@config.targets)
-      _.each(@config.targets, (attr) ->
-          node.setAttribute(attr, value[attr])
-        )
-    if _.isString(@config.style) or _.isString(@config.attribute) or _.isString(@config.class)
+    if _.isString(@config.style) or _.isString(@config.attribute) or _.isString(@config.class) or _.isString(@config.className)
       if _.isString(@config.class)
         node = this.remove(node)
       if dom(node).isTextNode()

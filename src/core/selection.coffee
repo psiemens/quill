@@ -1,6 +1,7 @@
 _          = require('lodash')
 dom        = require('../lib/dom')
 Leaf       = require('./leaf')
+Embed      = require('./embed')
 Normalizer = require('../lib/normalizer')
 Range      = require('../lib/range')
 
@@ -10,6 +11,7 @@ class Selection
     @focus = false
     @range = new Range(0, 0)
     @nullDelay = false
+    @selectedEmbed = false
     this.update('silent')
 
   checkFocus: ->
@@ -64,7 +66,10 @@ class Selection
   update: (source) ->
     focus = this.checkFocus()
     range = this.getRange(true)
-    emit = source != 'silent' and (!Range.compare(range, @range) or focus != @focus)
+    compare = Range.compare(range, @range)
+    if !compare
+      this._removeSelectedEmbed()
+    emit = source != 'silent' and ((!compare) or focus != @focus)
     toEmit = if focus then range else null
     # If range changes to null, require two update cycles to update and emit
     if toEmit == null and source == 'user' and !@nullDelay
@@ -75,6 +80,19 @@ class Selection
       @focus = focus
       # Set range before emitting to prevent infinite loop if listeners call quill.getSelection()
       @emitter.emit(@emitter.constructor.events.SELECTION_CHANGE, toEmit, source) if emit
+
+
+  selectEmbed: (embed) ->
+    if @selectedEmbed
+      dom(@selectedEmbed.node).removeClass('selected')
+    @selectedEmbed = embed
+    dom(@selectedEmbed.node).addClass('selected')
+    #this.setRange(null)
+
+  _removeSelectedEmbed: ->
+    if @selectedEmbed
+      dom(@selectedEmbed.node).removeClass('selected')
+      @selectedEmbed = false
 
   _decodePosition: (node, offset) ->
     if dom(node).isElement()
