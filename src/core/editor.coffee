@@ -30,7 +30,7 @@ class Editor
     @root.setAttribute('contenteditable', enabled)
 
   applyDelta: (delta, source) ->
-    inserted = []
+    inserted = false
     localDelta = this._update()
     if localDelta
       delta = localDelta.transform(delta, true)
@@ -39,13 +39,12 @@ class Editor
       delta = this._trackDelta( =>
         index = 0
         _.each(delta.ops, (op) =>
-          if _.isString(op.insert)
-            inserted.push(this._insertAt(index, op.insert, op.attributes))
-            index += op.insert.length;
-          else if _.isNumber(op.insert)
-            # TODO embed needs native insert
-            this._insertAt(index, dom.EMBED_TEXT, op.attributes)
+          if typeof op.attributes != 'undefined' && op.attributes.embed
+            inserted = this._insertEmbedAt(index, op.attributes.type, op.attributes.data)
             index += 1;
+          else if _.isString(op.insert)
+            this._insertAt(index, op.insert, op.attributes)
+            index += op.insert.length;
           else if _.isNumber(op.delete)
             this._deleteAt(index, op.delete)
           else if _.isNumber(op.retain)
@@ -61,7 +60,7 @@ class Editor
       @quill.emit(@quill.constructor.events.TEXT_CHANGE, delta, source) if delta and source != Editor.sources.SILENT
     if localDelta and localDelta.ops.length > 0 and source != Editor.sources.SILENT
       @quill.emit(@quill.constructor.events.TEXT_CHANGE, localDelta, Editor.sources.USER)
-    if inserted.length > 0
+    if inserted
       return inserted
 
   checkUpdate: (source = 'user') ->
@@ -105,6 +104,14 @@ class Editor
 
   getDelta: ->
     return @delta
+
+  _insertEmbedAt: (index, type, data) ->
+    [line, offset] = @doc.findLineAt(index)
+    oldLine = line
+    line = @doc.insertEmbedBefore(document.createElement(dom.DEFAULT_EMBED_TAG), oldLine, type, data)
+    @doc.removeLine(oldLine)
+    embedLine = line
+    return embedLine
 
   _deleteAt: (index, length) ->
     return if length <= 0
@@ -161,19 +168,13 @@ class Editor
             line.format(formatting)
             nextLine = null
         else
-          if(formatting.embed)
-            oldLine = line
-            line = @doc.insertEmbedBefore(document.createElement('DIV'), oldLine)
-            @doc.removeLine(oldLine)
-            embedLine = line
-          else
-            line.insertText(offset, lineText, formatting)
-            if i < lineTexts.length - 1       # Are there more lines to insert?
-              nextLine = @doc.splitLine(line, offset + lineText.length)
-              _.each(_.defaults({}, formatting, line.formats), (value, format) ->
-                line.format(format, formatting[format])
-              )
-              offset = 0
+          line.insertText(offset, lineText, formatting)
+          if i < lineTexts.length - 1       # Are there more lines to insert?
+            nextLine = @doc.splitLine(line, offset + lineText.length)
+            _.each(_.defaults({}, formatting, line.formats), (value, format) ->
+              line.format(format, formatting[format])
+            )
+            offset = 0
         line = nextLine
       )
     )

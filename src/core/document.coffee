@@ -22,8 +22,8 @@ class Document
   appendLine: (lineNode) ->
     return this.insertLineBefore(lineNode, null)
 
-  appendEmbed: (embedNode) ->
-    return this.insertEmbedBefore(embedNode, null)
+  appendEmbed: (embedNode, type, data) ->
+    return this.insertEmbedBefore(embedNode, null, type, data)
 
   findLeafAt: (index, inclusive) ->
     [line, offset] = this.findLineAt(index)
@@ -78,8 +78,8 @@ class Document
     @lineMap[line.id] = line
     return line
 
-  insertEmbedBefore: (newEmbedNode, refLine) ->
-    embed = new Embed(this, newEmbedNode)
+  insertEmbedBefore: (newEmbedNode, refLine, type, data) ->
+    embed = new Embed(this, newEmbedNode, type, data)
     if refLine?
       @root.insertBefore(newEmbedNode, refLine.node) unless dom(newEmbedNode.parentNode).isElement()  # Would prefer newLineNode.parentNode? but IE will have non-null object
       @lines.insertAfter(refLine.prev, embed)
