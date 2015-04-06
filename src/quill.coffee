@@ -145,6 +145,9 @@ class Quill extends EventEmitter2
   getHTML: ->
     @editor.doc.getHTML()
 
+  getJSON: ->
+    @editor.doc.getJSON()
+
   getLength: ->
     return @editor.getDelta().length()
 
@@ -198,6 +201,10 @@ class Quill extends EventEmitter2
   setHTML: (html, source = Quill.sources.API) ->
     html = "<#{dom.DEFAULT_BLOCK_TAG}><#{dom.DEFAULT_BREAK_TAG}></#{dom.DEFAULT_BLOCK_TAG}>" unless html.trim()
     @editor.doc.setHTML(html)
+    @editor.checkUpdate(source)
+
+  setJSON: (data, source = Quill.sources.API) ->
+    @editor.doc.buildFromJSON(data)
     @editor.checkUpdate(source)
 
   setSelection: (start, end, source = Quill.sources.API) ->

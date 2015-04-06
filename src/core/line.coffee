@@ -20,6 +20,9 @@ class Line extends LinkedList.Node
     this.rebuild()
     super(@node)
 
+  getJSON: ->
+    return @node.innerHTML
+
   buildLeaves: (node, formats) ->
     _.each(dom(node).childNodes(), (node) =>
       node = Normalizer.normalizeNode(node)

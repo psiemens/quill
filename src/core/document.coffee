@@ -59,6 +59,14 @@ class Document
     )
     return container.innerHTML
 
+  getJSON: ->
+    line = @lines.first
+    objects = []
+    while(line)
+      objects.push(line.getJSON())
+      line = line.next
+    return objects
+
   insertLineBefore: (newLineNode, refLine) ->
     line = new Line(this, newLineNode)
     if refLine?
@@ -134,6 +142,20 @@ class Document
         dom(line.node).remove()
     delete @lineMap[line.id]
     @lines.remove(line)
+
+
+  buildFromJSON: (data) ->
+    @lines = new LinkedList()
+    @lineMap = {}
+    @root.innerHTML = ''
+    _.each(data, (line) =>
+      if _.isString(line)
+        newLine = this.appendLine(document.createElement(dom.DEFAULT_BLOCK_TAG))
+        newLine.node.innerHTML = line;
+      else
+        newEmbed = this.appendEmbed(document.createElement(dom.DEFAULT_EMBED_TAG), line.type, line.data)
+    )
+    this.rebuild()
 
   setHTML: (html) ->
     html = Normalizer.stripComments(html)

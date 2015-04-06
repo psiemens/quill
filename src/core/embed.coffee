@@ -26,4 +26,7 @@ class Embed extends LinkedList.Node
       @doc.editor.selection.selectEmbed(this)
     )
 
+  getJSON: ->
+    return false unless typeof @controller != 'undefined'
+    return @controller.getJSON()
 module.exports = Embed
