@@ -12,11 +12,13 @@ class Line extends LinkedList.Node
   @CLASS_NAME : 'ql-line'
   @ID_PREFIX  : 'ql-line-'
 
-  constructor: (@doc, @node) ->
-    @id = _.uniqueId(Line.ID_PREFIX)
+  constructor: (@doc, @node, base) ->
+    if(typeof base == 'undefined')
+      base = Line
+    @id = _.uniqueId(base.ID_PREFIX)
     @formats = {}
     dom(@node).removeClass('ql-embed')
-    dom(@node).addClass(Line.CLASS_NAME)
+    dom(@node).addClass(base.CLASS_NAME)
     this.rebuild()
     super(@node)
 
