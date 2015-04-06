@@ -89,7 +89,7 @@ class Format
       else
         dom(node).wrap(formatNode)
         node = formatNode
-    if _.isString(@config.style) or _.isString(@config.attribute) or _.isString(@config.class) or _.isString(@config.className)
+    if _.isString(@config.style) or _.isString(@config.attribute) or _.isString(@config.class)
       if _.isString(@config.class)
         node = this.remove(node)
       if dom(node).isTextNode()
