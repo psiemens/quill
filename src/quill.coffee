@@ -13,6 +13,7 @@ class Quill extends EventEmitter2
   @editors: []
 
   @modules: []
+  @embeds: []
   @themes: []
 
   @DEFAULTS:
@@ -39,6 +40,10 @@ class Quill extends EventEmitter2
     console.warn("Overwriting #{name} module") if Quill.modules[name]?
     Quill.modules[name] = module
 
+  @registerEmbed: (name, controller) ->
+    console.warn("Overwriting #{name} embed controller") if Quill.embeds[name]?
+    Quill.embeds[name] = controller
+
   @registerTheme: (name, theme) ->
     console.warn("Overwriting #{name} theme") if Quill.themes[name]?
     Quill.themes[name] = theme
@@ -62,6 +67,7 @@ class Quill extends EventEmitter2
     @options.id = @id = "ql-editor-#{Quill.editors.length + 1}"
     @options.emitter = this
     @modules = {}
+    @embeds = {}
     @root = this.addContainer('ql-editor')
     @editor = new Editor(@root, this, @options)
     Quill.editors.push(this)
@@ -101,6 +107,12 @@ class Quill extends EventEmitter2
     @modules[name] = new moduleClass(this, options)
     this.emit(Quill.events.MODULE_INIT, name, @modules[name])
     return @modules[name]
+
+  addEmbed: (name) ->
+    embedClass = Quill.embeds[name]
+    throw new Error("Cannot load #{name} embed controller. Are you sure you registered it?") unless embedClass?
+    @embeds[name] = embedClass
+    return @embeds[name]
 
   deleteText: (start, end, source = Quill.sources.API) ->
     [start, end, formats, source] = this._buildParams(start, end, {}, source)
@@ -153,6 +165,9 @@ class Quill extends EventEmitter2
 
   getModule: (name) ->
     return @modules[name]
+
+  getEmbed: (name) ->
+    return @embeds[name]
 
   getSelection: ->
     @editor.checkUpdate()   # Make sure we access getRange with editor in consistent state
