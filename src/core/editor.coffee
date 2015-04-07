@@ -154,7 +154,6 @@ class Editor
     )
 
   _insertAt: (index, text, formatting = {}) ->
-    embedLine = false
     @selection.shiftAfter(index, text.length, =>
       text = text.replace(/\r\n?/g, '\n')
       lineTexts = text.split('\n')
@@ -178,7 +177,6 @@ class Editor
         line = nextLine
       )
     )
-    return embedLine
 
   _trackDelta: (fn) ->
     fn()
