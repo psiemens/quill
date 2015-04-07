@@ -26,7 +26,7 @@ class Embed extends Line
 
   _initController: (type, data) =>
     return unless _.isString(type)
-    controller = @doc.editor.quill.getEmbed(type)
+    controller = @doc.editor.quill.getEmbed(type).controller
     initialState = {
       type: type,
       data: data
