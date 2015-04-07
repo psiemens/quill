@@ -10,7 +10,10 @@ class PasteManager
     @container.setAttribute('contenteditable', true)
     dom(@quill.root).on('paste', _.bind(this._paste, this))
 
-  _paste: ->
+  _paste: (e) ->
+    if @quill.editor.selection.selectedEmbed
+      e.defaultPrevented = false
+      return e
     oldDocLength = @quill.getLength()
     range = @quill.getSelection()
     return unless range?
