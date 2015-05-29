@@ -19,7 +19,7 @@ class PasteManager
     return unless range?
     @container.focus()
     _.defer( =>
-      doc = new Document(@container, @quill.options)
+      doc = new Document(@container, null, @quill.options)
       delta = doc.toDelta()
       lengthAdded = delta.length() - 1
       # Need to remove trailing newline so paste is inline, losing format is expected and observed in Word

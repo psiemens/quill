@@ -149,9 +149,9 @@ class Document
     @lineMap = {}
     @root.innerHTML = ''
     _.each(data, (line) =>
-      if _.isString(line)
+      if line.type == 'paragraph'
         newLine = this.appendLine(document.createElement(dom.DEFAULT_BLOCK_TAG))
-        newLine.node.innerHTML = line;
+        newLine.node.innerHTML = line.data;
       else
         newEmbed = this.appendEmbed(document.createElement(dom.DEFAULT_EMBED_TAG), line.type, line.data)
     )

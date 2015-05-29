@@ -30,7 +30,6 @@ class Editor
     @root.setAttribute('contenteditable', enabled)
 
   applyDelta: (delta, source) ->
-    inserted = false
     localDelta = this._update()
     if localDelta
       delta = localDelta.transform(delta, true)
@@ -40,7 +39,7 @@ class Editor
         index = 0
         _.each(delta.ops, (op) =>
           if typeof op.attributes != 'undefined' && op.attributes.embed
-            inserted = this._insertEmbedAt(index, op.attributes.type, op.attributes.data)
+            this._insertEmbedAt(index, op.attributes.type, op.attributes.data)
             index += 1;
           else if _.isString(op.insert)
             this._insertAt(index, op.insert, op.attributes)
@@ -60,8 +59,6 @@ class Editor
       @quill.emit(@quill.constructor.events.TEXT_CHANGE, delta, source) if delta and source != Editor.sources.SILENT
     if localDelta and localDelta.ops.length > 0 and source != Editor.sources.SILENT
       @quill.emit(@quill.constructor.events.TEXT_CHANGE, localDelta, Editor.sources.USER)
-    if inserted
-      return inserted
 
   checkUpdate: (source = 'user') ->
     return clearInterval(@timer) unless @root.parentNode?
@@ -106,12 +103,10 @@ class Editor
     return @delta
 
   _insertEmbedAt: (index, type, data) ->
-    [line, offset] = @doc.findLineAt(index)
-    oldLine = line
-    line = @doc.insertEmbedBefore(document.createElement(dom.DEFAULT_EMBED_TAG), oldLine, type, data)
-    @doc.removeLine(oldLine)
-    embedLine = line
-    return embedLine
+    [oldLine, offset] = @doc.findLineAt(index)
+    @doc.insertEmbedBefore(document.createElement(dom.DEFAULT_EMBED_TAG), oldLine, type, data)
+    if oldLine.next # if it isn't the last line
+      @doc.removeLine(oldLine)
 
   _deleteAt: (index, length) ->
     return if length <= 0
