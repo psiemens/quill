@@ -108,10 +108,10 @@ class Quill extends EventEmitter2
     this.emit(Quill.events.MODULE_INIT, name, @modules[name])
     return @modules[name]
 
-  addEmbed: (name) ->
+  addEmbed: (name, options) ->
     embedClass = Quill.embeds[name]
     throw new Error("Cannot load #{name} embed controller. Are you sure you registered it?") unless embedClass?
-    @embeds[name] = embedClass
+    @embeds[name] = embedClass(options)
     return @embeds[name]
 
   deleteText: (start, end, source = Quill.sources.API) ->
