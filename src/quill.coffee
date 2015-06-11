@@ -170,7 +170,14 @@ class Quill extends EventEmitter2
     return @embeds[name]
 
   getEmbeds: ->
-    return @embeds
+    embeds = []
+    _.forEach(@embeds, (embed, key) ->
+      embeds.push({
+        key: key,
+        controller: embed.controller
+        })
+    )
+    return embeds
 
   getSelection: ->
     @editor.checkUpdate()   # Make sure we access getRange with editor in consistent state
