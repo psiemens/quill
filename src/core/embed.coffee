@@ -31,7 +31,11 @@ class Embed extends Line
       type: type,
       data: data
     }
-    @controller = controller(@node, initialState)
+    @controller = controller(this, initialState)
+
+  remove: =>
+    delete @controller
+    @doc.removeLine(this)
 
   getJSON: ->
     return false unless typeof @controller != 'undefined'
