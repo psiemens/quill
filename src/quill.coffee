@@ -174,7 +174,7 @@ class Quill extends EventEmitter2
     _.forEach(@embeds, (embed, key) ->
       embeds.push({
         key: key,
-        controller: embed.controller
+        trigger: embed.trigger
         })
     )
     return embeds
