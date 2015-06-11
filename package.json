@@ -71,7 +71,6 @@
   },
   "scripts": {
     "preinstall": "npm install -g grunt-cli && npm install && grunt dist",
-    "postinstall": "grunt clean:all",
     "test": "grunt test"
   },
   "keywords": [
