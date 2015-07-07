@@ -81,10 +81,10 @@ class Document
             type: 'list',
             data: [line.getJSON()]
           }
-      else if prevLine == 'LI' and list
-        objects.push(list)
-        list = false
       else
+        if prevLine == 'LI' and list
+          objects.push(list)
+          list = false
         objects.push(line.getJSON())
       prevLine = line.node.nodeName
       line = line.next
