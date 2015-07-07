@@ -73,7 +73,7 @@ class Document
     objects = []
     list = false
     while(line)
-      if line.node.nodeName == 'LI'
+      if line.node.nodeName == dom.DEFAULT_LIST_ITEM_TAG
         if list
           list.data.push(line.getJSON())
         else
@@ -82,13 +82,13 @@ class Document
             data: [line.getJSON()]
           }
       else
-        if prevLine == 'LI' and list
+        if prevLine == dom.DEFAULT_LIST_ITEM_TAG and list
           objects.push(list)
           list = false
         objects.push(line.getJSON())
       prevLine = line.node.nodeName
       line = line.next
-    if prevLine == 'LI' and list
+    if prevLine == dom.DEFAULT_LIST_ITEM_TAG and list
       objects.push(list)
     return objects
 
