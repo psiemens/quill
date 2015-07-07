@@ -345,6 +345,8 @@ dom = _.extend(dom,
   DEFAULT_EMBED_TAG: 'DIV'
   DEFAULT_BREAK_TAG: 'BR'
   DEFAULT_INLINE_TAG: 'SPAN'
+  DEFAULT_LIST_TAG: 'UL'
+  DEFAULT_LIST_ITEM_TAG: 'LI'
   EMBED_TEXT: '!' # No reason we picked ! besides it being one character (so delta cannot split it up)
 
   FONT_SIZES:

@@ -25,6 +25,15 @@ class Document
   appendEmbed: (embedNode, type, data) ->
     return this.insertEmbedBefore(embedNode, null, type, data)
 
+  appendList: (data) ->
+    newList = document.createElement(dom.DEFAULT_LIST_TAG)
+    _.each(data, (item) =>
+      newLine = document.createElement(dom.DEFAULT_LIST_ITEM_TAG)
+      newLine.innerHTML = item;
+      newList.appendChild(newLine)
+      )
+    @root.appendChild(newList)
+
   findLeafAt: (index, inclusive) ->
     [line, offset] = this.findLineAt(index)
     return if line? then line.findLeafAt(offset, inclusive) else [null, offset]
@@ -168,6 +177,8 @@ class Document
       if line.type == 'paragraph'
         newLine = this.appendLine(document.createElement(dom.DEFAULT_BLOCK_TAG))
         newLine.node.innerHTML = line.data;
+      else if line.type == 'list'
+        this.appendList(line.data)
       else
         newEmbed = this.appendEmbed(document.createElement(dom.DEFAULT_EMBED_TAG), line.type, line.data)
     )
