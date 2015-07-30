@@ -38,6 +38,9 @@ Normalizer =
     'UL'
     'LI'
     'P'
+    'H1'
+    'H2'
+    'H3'
   }
 
   # Make sure descendant break tags are not causing multiple lines to be rendered

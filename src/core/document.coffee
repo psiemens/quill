@@ -179,6 +179,9 @@ class Document
         newLine.node.innerHTML = line.data;
       else if line.type == 'list'
         this.appendList(line.data)
+      else if line.type == 'header'
+        newLine = this.appendLine(document.createElement(line.data.size))
+        newLine.node.innerHTML = line.data.content;
       else
         newEmbed = this.appendEmbed(document.createElement(dom.DEFAULT_EMBED_TAG), line.type, line.data)
     )

@@ -23,7 +23,16 @@ class Line extends LinkedList.Node
     super(@node)
 
   getJSON: ->
-    return @node.innerHTML
+    if this.isHeader()
+      return {
+        type : 'header',
+        data : {
+          content : @node.innerHTML
+          size : @node.tagName
+        }
+      }
+    else
+      return @node.innerHTML
 
   buildLeaves: (node, formats) ->
     _.each(dom(node).childNodes(), (node) =>
@@ -117,6 +126,20 @@ class Line extends LinkedList.Node
       leafOffset = 0
       leaf = nextLeaf
     this.rebuild()
+
+
+  isHeader: ->
+    return @node.tagName in ['H1', 'H2', 'H3']
+
+  formatHeader: (size) ->
+    if size == @node.tagName
+      line = document.createElement('DIV')
+    else
+      line = document.createElement(size)
+    line.className = 'ql-line'  
+    line.innerHTML = @node.innerHTML
+    dom(@node).replace(line)
+    @node = line
 
   insertText: (offset, text, formats = {}) ->
     return unless text.length > 0

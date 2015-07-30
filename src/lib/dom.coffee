@@ -411,6 +411,7 @@ dom = _.extend(dom,
     'P'
     'DIV'
     'LI'
+    'H1', 'H2', 'H3', 'H4', 'H5', 'H6'
   }
 
   LIST_TAGS: {
